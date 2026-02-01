@@ -12,7 +12,7 @@ import java.util.UUID;
 
 /**
  * Command to log in using a pre-defined offline account in the config.properties file.
- * Usage: offline <id>
+ * Usage: offline {@code <id>}
  */
 public class OfflineCommand extends AbstractLauncherCommand {
 
