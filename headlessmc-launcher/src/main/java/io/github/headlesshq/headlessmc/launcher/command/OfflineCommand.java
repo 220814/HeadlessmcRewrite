@@ -23,10 +23,20 @@ public class OfflineCommand extends AbstractLauncherCommand {
     @Override
     public void execute(String line, String... args) throws CommandException {
         if (args.length == 0) {
-            throw new CommandException("Usage: offline <id> (e.g., offline 1)");
+            throw new CommandException("Usage: offline {@code <id>} (e.g., offline 1)");
         }
 
-        String id = args[0];
+        // Handle cases where the command name itself is passed in the args array
+        String id;
+        if (args[0].equalsIgnoreCase("offline")) {
+            if (args.length < 2) {
+                throw new CommandException("Usage: offline {@code <id>} (e.g., offline 1)");
+            }
+            id = args[1];
+        } else {
+            id = args[0];
+        }
+
         String keyName = LauncherProperties.OFFLINE_ACCOUNT_PREFIX.getName() + id;
         Property<String> dynamicProperty = string(keyName);
         
@@ -38,7 +48,7 @@ public class OfflineCommand extends AbstractLauncherCommand {
 
         String uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + username).getBytes(StandardCharsets.UTF_8)).toString();
         
-        // Use the newly implemented offline constructor in ValidatedAccount
+        // Initialize the account using the custom offline constructor in ValidatedAccount
         ValidatedAccount offlineAccount = new ValidatedAccount(username, uuid, "0");
         
         ctx.getAccountManager().addAccount(offlineAccount);
