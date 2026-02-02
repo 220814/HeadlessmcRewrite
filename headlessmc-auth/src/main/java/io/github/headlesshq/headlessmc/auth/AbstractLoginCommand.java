@@ -10,8 +10,8 @@ import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.java.model.MinecraftProfile;
 import net.raphimc.minecraftauth.java.model.MinecraftToken;
 import net.raphimc.minecraftauth.msa.model.MsaDeviceCode;
-// SỬA IMPORT: Đây mới là lớp thực sự tồn tại trong source của bạn
-import net.raphimc.minecraftauth.step.java.StepMinecraftJava;
+// SỬA IMPORT: Sử dụng lớp MinecraftJava thực tế trong bộ nguồn
+import net.raphimc.minecraftauth.MinecraftJava;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -51,9 +51,8 @@ public abstract class AbstractLoginCommand extends AbstractCommand {
                 try {
                     HttpClient httpClient = httpClientFactory.get();
 
-                    // SỬA LỖI TẠI ĐÂY: Sử dụng StepMinecraftJava.DEFAULT_BUILDER
-                    // hoặc khởi tạo builder từ StepMinecraftJava
-                    MinecraftToken mcToken = StepMinecraftJava.builder()
+                    // SỬA LỖI: Trong bản này, MinecraftJava là entry point chính
+                    MinecraftToken mcToken = MinecraftJava.builder()
                             .withHttpClient(httpClient)
                             .withDeviceCode(msaDeviceCode -> {
                                 ctx.log("Please go to " + msaDeviceCode.getDirectVerificationUri() 
@@ -61,7 +60,7 @@ public abstract class AbstractLoginCommand extends AbstractCommand {
                             })
                             .build();
 
-                    MinecraftProfile mcProfile = StepMinecraftJava.builder()
+                    MinecraftProfile mcProfile = MinecraftJava.builder()
                             .withHttpClient(httpClient)
                             .getProfile(mcToken);
 
@@ -81,7 +80,7 @@ public abstract class AbstractLoginCommand extends AbstractCommand {
         startLoginThread(thread);
     }
 
-    // ... các hàm khác giữ nguyên ...
+    // ... giữ nguyên phần còn lại ...
     protected void cancelLoginProcess(String... args) throws CommandException {
         if (args.length <= 2) {
             throw new CommandException("Please specify the login process id!");
