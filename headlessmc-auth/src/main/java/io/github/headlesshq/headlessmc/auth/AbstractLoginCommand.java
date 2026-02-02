@@ -9,7 +9,7 @@ import net.lenni0451.commons.httpclient.HttpClient;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.java.model.MinecraftProfile;
 import net.raphimc.minecraftauth.java.model.MinecraftToken;
-import net.raphimc.minecraftauth.microsoft.model.MsaDeviceCode;
+import net.raphimc.minecraftauth.microsoft.MsaDeviceCode; // Sửa lỗi package ở đây
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -49,8 +49,7 @@ public abstract class AbstractLoginCommand extends AbstractCommand {
                 try {
                     HttpClient httpClient = httpClientFactory.get();
 
-                    // Sử dụng builder mới của MinecraftAuth 5.0.1
-                    // Thay thế toàn bộ hệ thống Step cũ
+                    // Cấu hình Builder theo chuẩn MinecraftAuth 5.0.1
                     MinecraftToken mcToken = MinecraftAuth.JAVA_EDITION_BUILDER
                             .withHttpClient(httpClient)
                             .withDeviceCode(msaDeviceCode -> {
