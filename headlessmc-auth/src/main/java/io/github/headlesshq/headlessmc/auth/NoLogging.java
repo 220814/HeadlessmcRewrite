@@ -1,6 +1,5 @@
 package io.github.headlesshq.headlessmc.auth;
 
-// Bỏ chữ .logging ở giữa đi
 import net.lenni0451.commons.httpclient.IHttpClientLogger;
 
 public enum NoLogging implements IHttpClientLogger {
@@ -8,17 +7,21 @@ public enum NoLogging implements IHttpClientLogger {
 
     @Override
     public void info(String s) {
+        // NOP
     }
 
     @Override
     public void warn(String s) {
+        // NOP
     }
 
     @Override
     public void error(String s) {
+        // NOP
     }
 
     @Override
     public void error(String s, Throwable t) {
+        // NOP
     }
 }
