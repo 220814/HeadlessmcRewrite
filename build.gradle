@@ -28,14 +28,9 @@ allprojects {
 
     repositories {
         mavenCentral()
-        maven {
-            name '3arthMaven'
-            url 'https://3arthqu4ke.github.io/maven'
-        }
-        maven {
-            name 'JitPackMaven'
-            url 'https://jitpack.io'
-        }
+        maven { url 'https://3arthqu4ke.github.io/maven' }
+        maven { url 'https://jitpack.io' }
+        // Vẫn giữ flatDir để hỗ trợ các trường hợp khác nếu cần
         flatDir {
             dirs "${rootProject.projectDir}/libs"
         }
@@ -47,7 +42,6 @@ allprojects {
     } else {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
-
         compileJava {
             if (JavaVersion.current().isJava9Compatible()) {
                 options.compilerArgs.addAll(['--release', '8'])
@@ -66,8 +60,9 @@ allprojects {
         compileOnly 'org.jetbrains:annotations:26.0.2-1'
         testImplementation 'org.jetbrains:annotations:26.0.2-1'
         
-        // Sửa dòng 67: Khai báo theo định dạng đầy đủ để ShadowJar và Publishing hoạt động
-        jarLibsApi group: 'net.raphimc', name: 'MinecraftAuth-5.0.1-SNAPSHOT', version: '5.0.1-SNAPSHOT'
+        // SỬA TẠI ĐÂY: Dùng files() để trỏ trực tiếp vào file trong thư mục libs của root project
+        // Cách này an toàn nhất, không phụ thuộc vào việc Gradle tìm kiếm trên Maven
+        jarLibsApi files("${rootProject.projectDir}/libs/MinecraftAuth-5.0.1-SNAPSHOT.jar")
 
         if (project != project(':headlessmc-modlauncher')) {
             compileOnly 'org.projectlombok:lombok:1.18.42'
@@ -166,6 +161,7 @@ allprojects {
     }
 
     shadowJar {
+        // Cấu hình này giúp shadowJar gom file jar cục bộ vào bản build cuối
         configurations = [project.configurations.jarLibs, project.configurations.jarLibsApi]
         archiveClassifier.set('')
     }
