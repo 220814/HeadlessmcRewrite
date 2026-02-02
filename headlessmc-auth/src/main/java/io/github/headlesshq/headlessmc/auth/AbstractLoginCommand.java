@@ -10,8 +10,8 @@ import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.java.model.MinecraftProfile;
 import net.raphimc.minecraftauth.java.model.MinecraftToken;
 import net.raphimc.minecraftauth.msa.model.MsaDeviceCode;
-// DÙNG IMPORT NÀY - Lớp này tồn tại trong source của bạn
-import net.raphimc.minecraftauth.java.MinecraftJava;
+// SỬA IMPORT: Đây là lớp duy nhất trong source của bạn có chứa logic Builder cho Java
+import net.raphimc.minecraftauth.java.MinecraftJavaService;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -50,7 +50,10 @@ public abstract class AbstractLoginCommand extends AbstractCommand {
             public void run() {
                 try {
                     HttpClient httpClient = httpClientFactory.get();
-                    MinecraftToken mcToken = MinecraftJava.builder()
+
+                    // SỬA LỖI TẠI ĐÂY: Sử dụng MinecraftJavaService.builder()
+                    // Lớp này tồn tại trong package net.raphimc.minecraftauth.java của file txt bạn gửi
+                    MinecraftToken mcToken = MinecraftJavaService.builder()
                             .withHttpClient(httpClient)
                             .withDeviceCode(msaDeviceCode -> {
                                 ctx.log("Please go to " + msaDeviceCode.getDirectVerificationUri() 
@@ -58,7 +61,7 @@ public abstract class AbstractLoginCommand extends AbstractCommand {
                             })
                             .build();
 
-                    MinecraftProfile mcProfile = MinecraftJava.builder()
+                    MinecraftProfile mcProfile = MinecraftJavaService.builder()
                             .withHttpClient(httpClient)
                             .getProfile(mcToken);
 
@@ -114,4 +117,4 @@ public abstract class AbstractLoginCommand extends AbstractCommand {
         return threads.stream().anyMatch(t -> threadName.equals(t.getName()));
     }
 }
-                        
+            
