@@ -14,3 +14,6 @@
 
 # warning : 
 - I think it's not advisable to use the jar file in this project because it's prone to any kind of risk if you use it as a bot for a Minecraft server.
+
+# Instructions for use:
+- Let's leave it for later because I think this project won't succeed, lol.
