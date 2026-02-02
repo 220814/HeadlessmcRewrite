@@ -9,8 +9,8 @@ import net.lenni0451.commons.httpclient.HttpClient;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.java.model.MinecraftProfile;
 import net.raphimc.minecraftauth.java.model.MinecraftToken;
-// Sửa import đúng theo tệp MinecraftAuth_20260202.txt
 import net.raphimc.minecraftauth.msa.model.MsaDeviceCode;
+
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
@@ -49,8 +49,9 @@ public abstract class AbstractLoginCommand extends AbstractCommand {
                 try {
                     HttpClient httpClient = httpClientFactory.get();
 
-                    // Cấu hình Builder theo chuẩn MinecraftAuth 5.0.1
-                    MinecraftToken mcToken = MinecraftAuth.JAVA_EDITION_BUILDER
+                    // Sửa lỗi: Sử dụng MinecraftAuth.createJavaForAccount() hoặc builder()
+                    // Dựa trên mã nguồn, cách chuẩn nhất là:
+                    MinecraftToken mcToken = MinecraftAuth.createJavaBuilder()
                             .withHttpClient(httpClient)
                             .withDeviceCode(msaDeviceCode -> {
                                 ctx.log("Please go to " + msaDeviceCode.getDirectVerificationUri() 
@@ -58,7 +59,7 @@ public abstract class AbstractLoginCommand extends AbstractCommand {
                             })
                             .build();
 
-                    MinecraftProfile mcProfile = MinecraftAuth.JAVA_EDITION_BUILDER
+                    MinecraftProfile mcProfile = MinecraftAuth.createJavaBuilder()
                             .withHttpClient(httpClient)
                             .getProfile(mcToken);
 
@@ -78,6 +79,7 @@ public abstract class AbstractLoginCommand extends AbstractCommand {
         startLoginThread(thread);
     }
 
+    // ... các hàm khác giữ nguyên ...
     protected void cancelLoginProcess(String... args) throws CommandException {
         if (args.length <= 2) {
             throw new CommandException("Please specify the login process id!");
@@ -114,3 +116,4 @@ public abstract class AbstractLoginCommand extends AbstractCommand {
         return threads.stream().anyMatch(t -> threadName.equals(t.getName()));
     }
 }
+                        
