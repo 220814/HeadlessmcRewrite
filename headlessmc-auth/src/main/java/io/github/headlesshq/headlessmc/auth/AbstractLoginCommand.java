@@ -10,7 +10,8 @@ import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.java.model.MinecraftProfile;
 import net.raphimc.minecraftauth.java.model.MinecraftToken;
 import net.raphimc.minecraftauth.msa.model.MsaDeviceCode;
-import net.raphimc.minecraftauth.step.java.StepJavaTitle;
+// DÙNG IMPORT NÀY - Lớp này tồn tại trong source của bạn
+import net.raphimc.minecraftauth.java.MinecraftJava;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -49,7 +50,7 @@ public abstract class AbstractLoginCommand extends AbstractCommand {
             public void run() {
                 try {
                     HttpClient httpClient = httpClientFactory.get();
-                    MinecraftToken mcToken = StepJavaTitle.javaBuilder()
+                    MinecraftToken mcToken = MinecraftJava.builder()
                             .withHttpClient(httpClient)
                             .withDeviceCode(msaDeviceCode -> {
                                 ctx.log("Please go to " + msaDeviceCode.getDirectVerificationUri() 
@@ -57,7 +58,7 @@ public abstract class AbstractLoginCommand extends AbstractCommand {
                             })
                             .build();
 
-                    MinecraftProfile mcProfile = StepJavaTitle.javaBuilder()
+                    MinecraftProfile mcProfile = MinecraftJava.builder()
                             .withHttpClient(httpClient)
                             .getProfile(mcToken);
 
@@ -113,4 +114,4 @@ public abstract class AbstractLoginCommand extends AbstractCommand {
         return threads.stream().anyMatch(t -> threadName.equals(t.getName()));
     }
 }
-                
+                        
