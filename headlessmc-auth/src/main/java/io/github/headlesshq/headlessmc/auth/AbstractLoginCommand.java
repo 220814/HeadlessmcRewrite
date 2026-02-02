@@ -9,9 +9,11 @@ import net.lenni0451.commons.httpclient.HttpClient;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.java.model.MinecraftProfile;
 import net.raphimc.minecraftauth.java.model.MinecraftToken;
-import net.raphimc.minecraftauth.msa.model.MsaDeviceCode;
-// SỬA IMPORT: Đây là lớp duy nhất trong source của bạn có chứa logic Builder cho Java
-import net.raphimc.minecraftauth.java.MinecraftJavaService;
+import net.raphimc.minecraftauth.msa.MsaService;
+import net.raphimc.minecraftauth.msa.model.MsaToken;
+import net.raphimc.minecraftauth.step.StepConfig;
+import net.raphimc.minecraftauth.step.java.StepMinecraftJava;
+import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -50,20 +52,18 @@ public abstract class AbstractLoginCommand extends AbstractCommand {
             public void run() {
                 try {
                     HttpClient httpClient = httpClientFactory.get();
-
-                    // SỬA LỖI TẠI ĐÂY: Sử dụng MinecraftJavaService.builder()
-                    // Lớp này tồn tại trong package net.raphimc.minecraftauth.java của file txt bạn gửi
-                    MinecraftToken mcToken = MinecraftJavaService.builder()
-                            .withHttpClient(httpClient)
-                            .withDeviceCode(msaDeviceCode -> {
-                                ctx.log("Please go to " + msaDeviceCode.getDirectVerificationUri() 
+                    
+                    StepConfig stepConfig = StepConfig.builder()
+                            .httpClient(httpClient)
+                            .onMsaDeviceCode(msaDeviceCode -> {
+                                ctx.log("Please go to " + msaDeviceCode.getDirectVerificationUri()
                                         + " and enter the code: " + msaDeviceCode.getUserCode());
                             })
                             .build();
 
-                    MinecraftProfile mcProfile = MinecraftJavaService.builder()
-                            .withHttpClient(httpClient)
-                            .getProfile(mcToken);
+                    MsaToken msaToken = StepMsaDeviceCode.GET_TOKEN.run(stepConfig, null);
+                    MinecraftToken mcToken = StepMinecraftJava.LOGIN.run(stepConfig, msaToken);
+                    MinecraftProfile mcProfile = StepMinecraftJava.GET_PROFILE.run(stepConfig, mcToken);
 
                     onSuccessfulLogin(mcProfile, mcToken);
                 } catch (Exception e) {
@@ -117,4 +117,4 @@ public abstract class AbstractLoginCommand extends AbstractCommand {
         return threads.stream().anyMatch(t -> threadName.equals(t.getName()));
     }
 }
-            
+                        
