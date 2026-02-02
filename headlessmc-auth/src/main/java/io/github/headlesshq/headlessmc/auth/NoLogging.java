@@ -1,27 +1,17 @@
 package io.github.headlesshq.headlessmc.auth;
 
-import net.lenni0451.commons.httpclient.IHttpClientLogger;
-
-public enum NoLogging implements IHttpClientLogger {
+public enum NoLogging {
     INSTANCE;
 
-    @Override
-    public void info(String message) {
-        // NOP
+    public void info(String s) {
     }
 
-    @Override
-    public void warn(String message) {
-        // NOP
+    public void warn(String s) {
     }
 
-    @Override
-    public void error(String message) {
-        // NOP
+    public void error(String s) {
     }
 
-    @Override
-    public void error(String message, Throwable cause) {
-        // NOP
+    public void error(String s, Throwable t) {
     }
 }
