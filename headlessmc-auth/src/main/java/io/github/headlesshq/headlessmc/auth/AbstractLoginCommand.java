@@ -10,8 +10,7 @@ import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.java.model.MinecraftProfile;
 import net.raphimc.minecraftauth.java.model.MinecraftToken;
 // Sửa import đúng theo tệp MinecraftAuth_20260202.txt
-import net.raphimc.minecraftauth.step.msa.MsaDeviceCode;
-
+import net.raphimc.minecraftauth.msa.model.MsaDeviceCode;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
