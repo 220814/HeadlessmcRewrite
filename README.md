@@ -1,7 +1,4 @@
 <!--suppress HtmlDeprecatedAttribute -->
-<div align="right">
-  <a href="https://github.com/xiaofanforfabric/headlessmc">中文</a> | English
-</div>
 
 <h1 align="center" style="font-weight: normal;"><b>HeadlessmcRewrite</b></h1>
 <p align=center">A command line launcher for Minecraft Java Edition.</p>
