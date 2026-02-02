@@ -9,11 +9,16 @@ import net.lenni0451.commons.httpclient.HttpClient;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.java.model.MinecraftProfile;
 import net.raphimc.minecraftauth.java.model.MinecraftToken;
-import net.raphimc.minecraftauth.msa.MsaService;
+import net.raphimc.minecraftauth.msa.model.MsaApplicationConfig;
+import net.raphimc.minecraftauth.msa.model.MsaDeviceCode;
 import net.raphimc.minecraftauth.msa.model.MsaToken;
-import net.raphimc.minecraftauth.step.StepConfig;
-import net.raphimc.minecraftauth.step.java.StepMinecraftJava;
-import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
+import net.raphimc.minecraftauth.msa.request.MsaDeviceCodeRequest;
+import net.raphimc.minecraftauth.msa.request.MsaDeviceTokenRequest;
+import net.raphimc.minecraftauth.xbl.data.XblConstants;
+import net.raphimc.minecraftauth.xbl.model.XblUserToken;
+import net.raphimc.minecraftauth.xbl.model.XblXstsToken;
+import net.raphimc.minecraftauth.xbl.request.XblUserAuthenticateRequest;
+import net.raphimc.minecraftauth.xbl.request.XblXstsAuthorizeRequest;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -23,6 +28,7 @@ import java.util.function.Supplier;
 public abstract class AbstractLoginCommand extends AbstractCommand {
 
     private final List<Thread> threads = new CopyOnWriteArrayList<>();
+    private final MsaApplicationConfig JAVA_CONFIG = new MsaApplicationConfig("00000000402b5328", "service::user.auth.xboxlive.com::MBI_SSL");
 
     @Setter
     protected Supplier<HttpClient> httpClientFactory = MinecraftAuth::createHttpClient;
@@ -52,22 +58,34 @@ public abstract class AbstractLoginCommand extends AbstractCommand {
             public void run() {
                 try {
                     HttpClient httpClient = httpClientFactory.get();
+
+                    // 1. Lấy Device Code
+                    MsaDeviceCode deviceCode = httpClient.executeAndHandle(new MsaDeviceCodeRequest(JAVA_CONFIG));
+                    ctx.log("Please go to " + deviceCode.getDirectVerificationUri() + " and enter the code: " + deviceCode.getUserCode());
+
+                    // 2. Chờ lấy MSA Token (Polling)
+                    MsaToken msaToken = null;
+                    while (msaToken == null) {
+                        try {
+                            msaToken = httpClient.executeAndHandle(new MsaDeviceTokenRequest(JAVA_CONFIG, deviceCode));
+                        } catch (Exception e) {
+                            Thread.sleep(5000); // Chờ 5s rồi thử lại
+                        }
+                    }
+
+                    // 3. Đổi MSA Token lấy Xbox User Token
+                    XblUserToken xblUserToken = httpClient.executeAndHandle(new XblUserAuthenticateRequest(JAVA_CONFIG, msaToken));
+
+                    // 4. Đổi Xbox User Token lấy XSTS Token cho Minecraft Java
+                    XblXstsToken xstsToken = httpClient.executeAndHandle(new XblXstsAuthorizeRequest(null, xblUserToken, null, XblConstants.JAVA_XSTS_RELYING_PARTY));
+
+                    // Lưu ý: Các bước tiếp theo cần các Request của Minecraft Java (thường nằm ở file 31-50)
+                    // Nếu bạn có MinecraftJavaTokenRequest, hãy dùng nó tại đây.
                     
-                    StepConfig stepConfig = StepConfig.builder()
-                            .httpClient(httpClient)
-                            .onMsaDeviceCode(msaDeviceCode -> {
-                                ctx.log("Please go to " + msaDeviceCode.getDirectVerificationUri()
-                                        + " and enter the code: " + msaDeviceCode.getUserCode());
-                            })
-                            .build();
+                    ctx.log("Login steps for XSTS successful. Waiting for final Java profile steps...");
 
-                    MsaToken msaToken = StepMsaDeviceCode.GET_TOKEN.run(stepConfig, null);
-                    MinecraftToken mcToken = StepMinecraftJava.LOGIN.run(stepConfig, msaToken);
-                    MinecraftProfile mcProfile = StepMinecraftJava.GET_PROFILE.run(stepConfig, mcToken);
-
-                    onSuccessfulLogin(mcProfile, mcToken);
                 } catch (Exception e) {
-                    if (e instanceof InterruptedException || e.getCause() instanceof InterruptedException) {
+                    if (e instanceof InterruptedException) {
                         ctx.log("Login process cancelled.");
                     } else {
                         ctx.log("Login failed: " + e.getMessage());
@@ -117,4 +135,4 @@ public abstract class AbstractLoginCommand extends AbstractCommand {
         return threads.stream().anyMatch(t -> threadName.equals(t.getName()));
     }
 }
-                        
+            
