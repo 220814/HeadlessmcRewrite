@@ -6,8 +6,6 @@ import io.github.headlesshq.headlessmc.auth.ValidatedAccount;
 import io.github.headlesshq.headlessmc.launcher.LauncherProperties;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.raphimc.minecraftauth.MinecraftAuth;
-import net.raphimc.minecraftauth.step.java.session.StepFullJavaSession;
-import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -47,22 +45,8 @@ public class AccountManager {
 
     @Synchronized
     public ValidatedAccount refreshAccount(ValidatedAccount account, @Nullable Config config) throws AuthException {
-        try {
-            log.debug("Refreshing account " + account);
-            HttpClient httpClient = MinecraftAuth.createHttpClient();
-            StepFullJavaSession.FullJavaSession refreshedSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.refresh(httpClient, account.getSession());
-            ValidatedAccount refreshedAccount = new ValidatedAccount(refreshedSession, account.getXuid());
-            log.debug("Refreshed account: " + refreshedAccount);
-            removeAccount(account);
-            addAccount(refreshedAccount);
-            return refreshedAccount;
-        } catch (Exception e) {
-            if (config != null && config.get(LauncherProperties.REFRESH_FAILURE_DELETE, false)) {
-                removeAccount(account);
-            }
-
-            throw new AuthException(e.getMessage(), e);
-        }
+        log.warn("Account refresh is not yet implemented for the new auth library. Skipping refresh for: " + account.getName());
+        return account;
     }
 
     @Deprecated
@@ -84,16 +68,7 @@ public class AccountManager {
         String email = config.get(LauncherProperties.EMAIL);
         String password = config.get(LauncherProperties.PASSWORD);
         if (email != null && password != null) {
-            log.info("Logging in with Email and password...");
-            try {
-                HttpClient httpClient = MinecraftAuth.createHttpClient();
-                StepFullJavaSession.FullJavaSession session = MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(
-                    httpClient, new StepCredentialsMsaCode.MsaCredentials(email, password));
-                ValidatedAccount validatedAccount = accountValidator.validate(session);
-                addAccount(validatedAccount);
-            } catch (Exception e) {
-                throw new AuthException(e.getMessage(), e);
-            }
+            log.warn("Email/Password login is no longer supported in this version. Please use Device Code login.");
         }
 
         if (config.get(LauncherProperties.REFRESH_ON_LAUNCH, false)) {
@@ -124,5 +99,5 @@ public class AccountManager {
             config.get(LauncherProperties.OFFLINE_TOKEN, ""),
             config.get(LauncherProperties.XUID, ""));
     }
-
 }
+                              
