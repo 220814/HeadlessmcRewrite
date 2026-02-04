@@ -28,10 +28,6 @@ public final class Main {
                 HeadlessMcApi.setInstance(null);
                 LauncherApi.setLauncher(null);
             } else {
-                // These "System.exit()" calls are here because of the LoginCommands
-                // -webview option. It seems that after closing the JFrame there is
-                // still either the AWT, Webview or Javafx thread running, keeping the
-                // program alive.
                 try {
                     if (throwable == null) {
                         exitManager.exit(0);
@@ -40,12 +36,9 @@ public final class Main {
                         exitManager.exit(-1);
                     }
                 } catch (Throwable exitThrowable) {
-                    // it is possible, if we launch in memory, that forge prevents us from calling System.exit through their SecurityManager
-                    if (throwable != null && exitThrowable.getClass() == throwable.getClass()) { // we have logged FMLSecurityManager$ExitTrappedException before
+                    if (throwable != null && exitThrowable.getClass() == throwable.getClass()) {
                         log.error("Failed to exit!", exitThrowable);
                     }
-
-                    // TODO: exit gracefully, try to call Forge to exit
                 }
             }
         }
@@ -55,7 +48,9 @@ public final class Main {
         LauncherBuilder builder = new LauncherBuilder();
         builder.exitManager(exitManager);
         builder.initLogging();
-        AbstractLoginCommand.replaceLogger();
+        
+        // remove: AbstractLoginCommand.replaceLogger() because MinecaftAuth v5.0.1 does have
+        
         if (Main.class.getClassLoader() == ClassLoader.getSystemClassLoader()) {
             log.warn("Not running from the headlessmc-launcher-wrapper. No plugin support and in-memory launching.");
         }
@@ -68,5 +63,4 @@ public final class Main {
             launcher.getCommandLine().read(launcher.getHeadlessMc());
         }
     }
-
 }
