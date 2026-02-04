@@ -28,7 +28,8 @@ import io.github.headlesshq.headlessmc.launcher.specifics.VersionSpecificModMana
 import io.github.headlesshq.headlessmc.launcher.version.VersionService;
 import io.github.headlesshq.headlessmc.logging.LoggingService;
 import io.github.headlesshq.headlessmc.os.OS;
-import net.raphimc.minecraftauth.step.java.session.StepFullJavaSession;
+import net.raphimc.minecraftauth.java.model.MinecraftProfile;
+import net.raphimc.minecraftauth.java.model.MinecraftToken;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -88,8 +89,8 @@ public class LauncherMock {
         public static final String DUMMY_XUID = "dummy-xuid";
 
         @Override
-        public ValidatedAccount validate(StepFullJavaSession.FullJavaSession session) {
-            return new ValidatedAccount(session, DUMMY_XUID);
+        public ValidatedAccount validate(MinecraftProfile profile, MinecraftToken token) {
+            return new ValidatedAccount(profile, token, DUMMY_XUID);
         }
     }
 
@@ -108,5 +109,5 @@ public class LauncherMock {
             // NOP
         }
     }
-
 }
+        
