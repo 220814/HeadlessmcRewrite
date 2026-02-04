@@ -21,19 +21,19 @@ import java.nio.file.Paths;
 public class LaunchCommand extends AbstractDownloadingVersionCommand {
     public LaunchCommand(Launcher launcher) {
         super(launcher, "launch", "Launches the game.");
-        args.put("<version/id>", "Name or id of the version to launch. If you use the id you need to use the -id flag as well.");
+        args.put("<version/id>", "Name or id of the version to launch.");
         args.put("-id", "Use if you specified an id instead of a version name.");
         args.put("-commands", "Starts the game with the built-in command line support.");
-        args.put("-lwjgl", "Removes lwjgl code, causing Minecraft not to render anything.");
-        args.put("-inmemory", "Launches the game in the same JVM headlessmc is running in.");
+        args.put("-lwjgl", "Removes lwjgl code.");
+        args.put("-inmemory", "Launches the game in the same JVM.");
         args.put("-jndi", "Patches the Log4J vulnerability.");
         args.put("-lookup", "Patches the Log4J vulnerability even harder.");
-        args.put("-paulscode", "Removes some error messages from the PaulsCode library which may annoy you if you started the game with the -lwjgl flag.");
-        args.put("-noout", "Doesn't print Minecrafts output to the console."); // TODO: is this really necessary?
-        args.put("-quit", "Quit HeadlessMc after launching the game.");
+        args.put("-paulscode", "Removes some error messages.");
+        args.put("-noout", "Doesn't print Minecrafts output.");
+        args.put("-quit", "Quit HeadlessMc after launching.");
         args.put("-offline", "Launch Mc in offline mode.");
         args.put("--jvm", "Jvm args to use.");
-        args.put("--retries", "The amount of times you want to retry running Minecraft.");
+        args.put("--retries", "The amount of times to retry.");
     }
 
     @Override
@@ -84,11 +84,10 @@ public class LaunchCommand extends AbstractDownloadingVersionCommand {
                 if (ctx.getAccountManager().getOfflineChecker().isOffline()) {
                     return ctx.getAccountManager().getOfflineAccount(ctx.getConfig());
                 }
-
-                throw new AuthException("You can't play the game without an account! Please use the login command.");
+                throw new AuthException("You can't play without an account! Use the login command.");
             } else {
-                // Skip refresh for offline accounts (session is null)
-                if (account.getSession() != null && ctx.getConfig().get(LauncherProperties.REFRESH_ON_GAME_LAUNCH, true)) {
+                // kiểm tra 
+                if (account.getProfile() != null && ctx.getConfig().get(LauncherProperties.REFRESH_ON_GAME_LAUNCH, true)) {
                     try {
                         account = ctx.getAccountManager().refreshAccount(account, ctx.getConfig());
                     } catch (AuthException e) {
@@ -97,7 +96,6 @@ public class LaunchCommand extends AbstractDownloadingVersionCommand {
                         }
                     }
                 }
-
                 return toLaunchAccount(account);
             }
         } catch (AuthException e) {
@@ -106,8 +104,8 @@ public class LaunchCommand extends AbstractDownloadingVersionCommand {
     }
 
     private LaunchAccount toLaunchAccount(ValidatedAccount account) {
-        // Support for offline accounts where session is null
-        if (account.getSession() == null) {
+        // ll
+        if (account.getProfile() == null || account.getToken() == null) {
             return new LaunchAccount(
                 "offline",
                 account.getName(),
@@ -117,13 +115,14 @@ public class LaunchCommand extends AbstractDownloadingVersionCommand {
             );
         }
 
-        // Standard logic for premium accounts
-        return new LaunchAccount("msa",
-                account.getSession().getMcProfile().getName(),
-                account.getSession().getMcProfile().getId().toString(),
-                account.getSession().getMcProfile().getMcToken().getAccessToken(),
-                account.getXuid());
+        // Standard logic cho Premium sử dụng cấu trúc ValidatedAccount mới
+        return new LaunchAccount(
+                "msa",
+                account.getProfile().getName(),
+                account.getProfile().getId().toString(),
+                account.getToken().getToken(), // Lấy Access Token chuỗi từ MinecraftToken
+                account.getXuid()
+        );
     }
-
 }
-            
+        
