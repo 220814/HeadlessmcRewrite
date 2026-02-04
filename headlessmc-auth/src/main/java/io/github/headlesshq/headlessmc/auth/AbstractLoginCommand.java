@@ -9,6 +9,7 @@ import net.lenni0451.commons.httpclient.HttpClient;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.java.model.MinecraftProfile;
 import net.raphimc.minecraftauth.java.model.MinecraftToken;
+import net.raphimc.minecraftauth.java.request.MinecraftProfileRequest;
 import net.raphimc.minecraftauth.msa.model.MsaApplicationConfig;
 import net.raphimc.minecraftauth.msa.model.MsaDeviceCode;
 import net.raphimc.minecraftauth.msa.model.MsaToken;
@@ -28,7 +29,7 @@ import java.util.function.Supplier;
 public abstract class AbstractLoginCommand extends AbstractCommand {
 
     private final List<Thread> threads = new CopyOnWriteArrayList<>();
-    // Cấu hình Client ID mặc định cho Minecraft Java Edition
+    // Client ID mặc định cho Minecraft Java
     private final MsaApplicationConfig JAVA_CONFIG = new MsaApplicationConfig("00000000402b5328", "service::user.auth.xboxlive.com::MBI_SSL");
 
     @Setter
@@ -60,34 +61,46 @@ public abstract class AbstractLoginCommand extends AbstractCommand {
                 try {
                     HttpClient httpClient = httpClientFactory.get();
 
-                    // Bước 1: Yêu cầu Device Code từ Microsoft
-                    MsaDeviceCode deviceCode = httpClient.execute(new MsaDeviceCodeRequest(JAVA_CONFIG));
+                    // BƯỚC 1: Lấy Device Code
+                    MsaDeviceCodeRequest deviceCodeReq = new MsaDeviceCodeRequest(JAVA_CONFIG);
+                    MsaDeviceCode deviceCode = deviceCodeReq.handle(httpClient.execute(deviceCodeReq));
+                    
                     ctx.log("Please go to " + deviceCode.getDirectVerificationUri() + " and enter the code: " + deviceCode.getUserCode());
 
-                    // Bước 2: Polling - Đợi người dùng nhập code và lấy MSA Token
+                    // BƯỚC 2: Đợi người dùng nhập code (Polling)
                     MsaToken msaToken = null;
                     while (msaToken == null && !isInterrupted()) {
                         try {
-                            msaToken = httpClient.execute(new MsaDeviceCodeTokenRequest(JAVA_CONFIG, deviceCode));
+                            MsaDeviceCodeTokenRequest msaTokenReq = new MsaDeviceCodeTokenRequest(JAVA_CONFIG, deviceCode);
+                            msaToken = msaTokenReq.handle(httpClient.execute(msaTokenReq));
                         } catch (Exception e) {
-                            // Chờ 5 giây trước khi thử lại nếu chưa nhập xong
+                            // Thường là lỗi 'authorization_pending', đợi 5s thử lại
                             Thread.sleep(5000);
                         }
                     }
 
                     if (msaToken == null) return;
 
-                    // Bước 3: Xác thực với Xbox Live (XBL)
-                    XblUserToken xblUserToken = httpClient.execute(new XblUserAuthenticateRequest(JAVA_CONFIG, msaToken));
+                    // BƯỚC 3: XBL Authentication
+                    XblUserAuthenticateRequest xblReq = new XblUserAuthenticateRequest(JAVA_CONFIG, msaToken);
+                    XblUserToken xblToken = xblReq.handle(httpClient.execute(xblReq));
 
-                    // Bước 4: Lấy XSTS Token cho Minecraft Services
-                    XblXstsToken xstsToken = httpClient.execute(new XblXstsAuthorizeRequest(null, xblUserToken, null, XblConstants.JAVA_XSTS_RELYING_PARTY));
+                    // BƯỚC 4: XSTS Token cho Minecraft
+                    XblXstsAuthorizeRequest xstsReq = new XblXstsAuthorizeRequest(null, xblToken, null, XblConstants.JAVA_XSTS_RELYING_PARTY);
+                    XblXstsToken xstsToken = xstsReq.handle(httpClient.execute(xstsReq));
 
-                    ctx.log("XSTS Token obtained successfully. Ready for Minecraft Java login.");
-                    
-                    // Lưu ý: Các bước Minecraft Java (lấy MinecraftToken và Profile) 
-                    // sẽ cần các file Request tương ứng mà bạn chưa gửi hết.
-                    
+                    // BƯỚC 5: Đổi XSTS lấy Minecraft Token (Giả định bạn có MinecraftJavaTokenRequest)
+                    // Ở đây tôi tạm thời tạo MinecraftToken giả định để demo bước Profile bạn vừa gửi
+                    // Trong thực tế, bạn cần MinecraftJavaTokenRequest để lấy mcToken thực.
+                    MinecraftToken mcToken = new MinecraftToken(xstsToken.getToken(), 3600); 
+
+                    // BƯỚC 6: Lấy Profile (Sử dụng file bạn vừa cung cấp)
+                    MinecraftProfileRequest profileReq = new MinecraftProfileRequest(mcToken);
+                    MinecraftProfile profile = profileReq.handle(httpClient.execute(profileReq));
+
+                    ctx.log("Logged in as: " + profile.getName() + " (" + profile.getId() + ")");
+                    onSuccessfulLogin(profile, mcToken);
+
                 } catch (InterruptedException e) {
                     ctx.log("Login process cancelled.");
                 } catch (Exception e) {
@@ -137,4 +150,4 @@ public abstract class AbstractLoginCommand extends AbstractCommand {
         return threads.stream().anyMatch(t -> threadName.equals(t.getName()));
     }
 }
-                
+                                                                    
