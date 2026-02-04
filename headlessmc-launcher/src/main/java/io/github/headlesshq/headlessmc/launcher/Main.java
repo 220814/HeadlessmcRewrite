@@ -4,6 +4,7 @@ import lombok.CustomLog;
 import lombok.experimental.UtilityClass;
 import io.github.headlesshq.headlessmc.api.HeadlessMcApi;
 import io.github.headlesshq.headlessmc.api.exit.ExitManager;
+import io.github.headlesshq.headlessmc.api.command.CommandContext; 
 import io.github.headlesshq.headlessmc.launcher.auth.AuthException;
 import io.github.headlesshq.headlessmc.launcher.launch.ExitToWrapperException;
 import io.github.headlesshq.headlessmc.launcher.version.VersionUtil;
@@ -52,21 +53,22 @@ public final class Main {
     }
 
     private static void startCommandLoop(Launcher launcher) {
-        log.info("Terminal initialized (Scanner-mode). Type 'exit' to quit.");
+        log.info("Terminal initialized. Type 'exit' to quit.");
         Scanner scanner = new Scanner(System.in);
         
-        var commandContext = launcher.getCommandLine().getCommandContext();
+        // S
+        CommandContext commandContext = launcher.getCommandLine().getCommandContext();
         
+        System.out.print("> ");
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine().trim();
             if (line.equalsIgnoreCase("exit") || line.equalsIgnoreCase("quit")) {
                 break;
             }
             if (!line.isEmpty()) {
-                
                 commandContext.execute(line);
             }
-            System.out.print("> "); 
+            System.out.print("> ");
         }
     }
 
@@ -83,6 +85,6 @@ public final class Main {
                 log.error("Failed to exit gracefully!", exitThrowable);
             }
         }
-    }
+    } 
 }
-                
+    
