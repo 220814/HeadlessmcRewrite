@@ -4,7 +4,7 @@ import lombok.CustomLog;
 import lombok.experimental.UtilityClass;
 import io.github.headlesshq.headlessmc.api.HeadlessMcApi;
 import io.github.headlesshq.headlessmc.api.exit.ExitManager;
-import io.github.headlesshq.headlessmc.api.command.CommandContext; 
+import io.github.headlesshq.headlessmc.api.command.CommandContext;
 import io.github.headlesshq.headlessmc.launcher.auth.AuthException;
 import io.github.headlesshq.headlessmc.launcher.launch.ExitToWrapperException;
 import io.github.headlesshq.headlessmc.launcher.version.VersionUtil;
@@ -48,15 +48,27 @@ public final class Main {
             log.info(String.format("Minecraft Dir: %s", launcher.getMcFiles()));
             launcher.log(VersionUtil.makeTable(VersionUtil.releases(launcher.getVersionService().getContents())));
 
-            startCommandLoop(launcher);
+            // android checker
+            boolean isAndroid = System.getProperty("os.name").toLowerCase().contains("android") 
+                             || System.getenv("TERMUX_VERSION") != null;
+
+            if (isAndroid) {
+                log.info("Android -> Jline is disabled.");
+                startScannerLoop(launcher);
+            } else {
+                try {
+                    log.info("window , linux... -> start JLine...");
+                    launcher.getCommandLine().read(launcher.getHeadlessMc());
+                } catch (Throwable t) {
+                    log.warn("JLine failed to initialize. Falling back.");
+                    startScannerLoop(launcher);
+                }
+            }
         }
     }
 
-    private static void startCommandLoop(Launcher launcher) {
-        log.info("Terminal initialized. Type 'exit' to quit.");
+    private static void startScannerLoop(Launcher launcher) {
         Scanner scanner = new Scanner(System.in);
-        
-        // S
         CommandContext commandContext = launcher.getCommandLine().getCommandContext();
         
         System.out.print("> ");
@@ -85,6 +97,6 @@ public final class Main {
                 log.error("Failed to exit gracefully!", exitThrowable);
             }
         }
-    } 
-}
-    
+    }
+    }
+                
