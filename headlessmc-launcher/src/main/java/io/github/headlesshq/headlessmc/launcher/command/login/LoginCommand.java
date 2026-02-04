@@ -6,7 +6,8 @@ import io.github.headlesshq.headlessmc.auth.AbstractLoginCommand;
 import io.github.headlesshq.headlessmc.launcher.Launcher;
 import io.github.headlesshq.headlessmc.launcher.auth.AuthException;
 import io.github.headlesshq.headlessmc.auth.ValidatedAccount;
-import net.raphimc.minecraftauth.step.java.session.StepFullJavaSession;
+import net.raphimc.minecraftauth.java.model.MinecraftProfile;
+import net.raphimc.minecraftauth.java.model.MinecraftToken;
 
 @CustomLog
 public class LoginCommand extends AbstractLoginCommand {
@@ -23,10 +24,11 @@ public class LoginCommand extends AbstractLoginCommand {
     }
 
     @Override
-    protected void onSuccessfulLogin(StepFullJavaSession.FullJavaSession session) {
+    protected void onSuccessfulLogin(MinecraftProfile profile, MinecraftToken token) {
         ValidatedAccount validatedAccount;
         try {
-            validatedAccount = launcher.getAccountManager().getAccountValidator().validate(session);
+            // clion
+            validatedAccount = launcher.getAccountManager().getAccountValidator().validate(profile, token);
         } catch (AuthException e) {
             ctx.log(e.getMessage());
             return;
@@ -35,5 +37,4 @@ public class LoginCommand extends AbstractLoginCommand {
         launcher.log("Logged into account " + validatedAccount.getName() + " successfully!");
         launcher.getAccountManager().addAccount(validatedAccount);
     }
-
-}
+ }
