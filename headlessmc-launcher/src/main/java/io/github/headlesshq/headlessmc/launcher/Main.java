@@ -60,7 +60,7 @@ public final class Main {
                     log.info("window , linux... -> start JLine...");
                     launcher.getCommandLine().read(launcher.getHeadlessMc());
                 } catch (Throwable t) {
-                    log.warn("JLine failed to initialize. Falling back.");
+                    log.warn("android? jline = off.");
                     startScannerLoop(launcher);
                 }
             }
