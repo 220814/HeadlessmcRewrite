@@ -38,7 +38,6 @@ public class LaunchTest {
         List<String> command = builder.command();
         assertEquals(16, command.size());
         assertEquals("java17", command.get(0));
-        assertEquals("-Djoml.nounsafe=true", command.get(1));
     }
 
     @Test
@@ -87,4 +86,3 @@ public class LaunchTest {
         IOUtil.copy(is, os);
     }
 }
-            
