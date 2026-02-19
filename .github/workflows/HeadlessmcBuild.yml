@@ -32,6 +32,6 @@ jobs:
       with:
         name: HeadlessMC-Artifacts
         path: |
-           "**/build/libs/*.jar"
+            **/build/libs/*.jar
           
           
