@@ -1,7 +1,7 @@
 name: Java CI with Gradle
 
 on:
-  workflow_dispatch: # Thêm dòng này để kích hoạt nút bấm thủ công
+  workflow_dispatch: 
 
 jobs:
   build:
@@ -32,6 +32,6 @@ jobs:
       with:
         name: HeadlessMC-Artifacts
         path: |
-          **/build/libs/headlessmc-launcher-wrapper-2.8.0.jar
+           "**/build/libs/*.jar"
           
           
