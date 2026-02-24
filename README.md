@@ -15,6 +15,7 @@
 # warning : 
 - I think it's not advisable to use the jar file in this project because it's prone to any kind of risk if you use it as a bot for a Minecraft server.
 - If you encounter an error related to *glfw*, please install vxfb and run (xvfb-run -a java -jar jar_name) to emulate a virtual screen on headless devices.
+- We recommend using it on an Ubuntu server because it's more stable than Debian and some other operating systems.
 
 # Instructions for use:
 - Run headlessmc in your terminal, download the vanilla and fabric versions you want, then press Ctrl + C.Run the command `cd headlessMc`, which will contain `config.properties`.Open it with nano and add hmc.offline.account1=your_account_name, Then save and exit the folder. Restart the jar and burn offline 1 (or another one) and play.
