@@ -23,5 +23,3 @@
 # Thanks : 
 - 3arthqu4ke : The lead developer, along with his collaborators, created headlessmc.
 - uid22 / 3 : Added offline functionality to allow playing Minecraft on servers using an offline account.
-
-# The repository will be permanently archived if no incidents are reported after 50 days.
